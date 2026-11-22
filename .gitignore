@@ -1,0 +1,6 @@
+/__pycache__/
+/dist/*.html
+/dist/llms.txt
+/dist/robots.txt
+/dist/sitemap.xml
+/Incipient.html

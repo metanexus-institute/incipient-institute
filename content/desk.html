@@ -1,0 +1,78 @@
+    <section class="frame page-intro desk-intro" aria-labelledby="desk-title">
+      <p class="eyebrow">Visitor services</p>
+      <h1 id="desk-title">Visitor record <em>desk.</em></h1>
+      <p>Request a copy of your entries in the Pavilion register. Replies to requests and corrections are kept with the copy.</p>
+      <nav class="in-page" aria-label="Related visitor information">
+        <a href="visit.html#arrival">Arrival and departure</a>
+        <a href="visit.html#visitor-agreement">Visitor agreement</a>
+        <a href="pavilion.html#revisions">Archive revisions</a>
+      </nav>
+    </section>
+    <section class="frame desk-area" data-record-desk>
+      <p class="desk-privacy" id="desk-privacy">This is an interactive work of fiction. Use an invented name or leave it blank. The record and replies stay in this browser.</p>
+      <noscript><p>Enable JavaScript to request a desk copy. The <a href="visit.html#visitor-register">visitor register extract</a> is available here.</p></noscript>
+      <div class="desk-paper" data-desk-start hidden>
+        <h2>Request a copy.</h2>
+        <form class="desk-form" data-desk-form aria-describedby="desk-privacy">
+          <label for="desk-alias">Name to print <span>(optional)</span></label>
+          <input id="desk-alias" type="text" maxlength="36" autocomplete="off" spellcheck="false" placeholder="Visitor">
+          <label for="desk-purpose">What brings you to the Pavilion?</label>
+          <select id="desk-purpose">
+            <option value="table">The Saturday Open Table</option>
+            <option value="meadow">A walk on the meadow path</option>
+            <option value="residence">An on-site fellowship</option>
+          </select>
+          <button class="button" type="submit">Request a desk copy</button>
+        </form>
+      </div>
+      <div data-desk-file hidden>
+        <article class="desk-paper" aria-labelledby="desk-file-title">
+          <p class="record-label" data-desk-reference></p>
+          <h2 id="desk-file-title" tabindex="-1">Your desk copy.</h2>
+          <dl class="desk-metadata">
+            <div><dt>Name on the register</dt><dd data-desk-name></dd></div>
+            <div><dt>Purpose of visit</dt><dd data-desk-purpose></dd></div>
+            <div><dt>Attached entries</dt><dd data-desk-count></dd></div>
+          </dl>
+          <div class="register-copy desk-entries">
+            <dl>
+              <div><dt data-desk-first-date></dt><dd data-desk-first-entry></dd></div>
+              <div><dt data-desk-second-date></dt><dd data-desk-second-entry></dd></div>
+              <div data-desk-amendment hidden><dt>Desk amendment</dt><dd data-desk-amendment-entry></dd></div>
+            </dl>
+          </div>
+          <ul class="desk-attachments" aria-label="Related evidence">
+            <li data-desk-attachment="table"><a href="programs.html#table-minutes">Compare the table minutes</a> · <a href="pavilion.html#common-room-still">Common-room still</a></li>
+            <li data-desk-attachment="meadow"><a href="pavilion.html#meadow-path-still">Compare the meadow still</a> · <a href="pavilion.html#floor-plan">Reference plans</a></li>
+            <li data-desk-attachment="residence"><a href="pavilion.html#residence-record">Compare the Room 3 extract</a> · <a href="pavilion.html#household-review">Later access review</a> · <a href="pavilion.html#residence-still">Room 3 still</a></li>
+          </ul>
+          <div class="desk-actions">
+            <button type="button" class="button" data-desk-read>Read the desk’s reply</button>
+            <button type="button" class="text-link desk-link-button" data-desk-download>Save a copy</button>
+          </div>
+        </article>
+        <article class="desk-paper desk-letter" data-desk-letter hidden aria-labelledby="desk-letter-title">
+          <p class="record-label">Correspondence · East desk</p>
+          <h2 id="desk-letter-title" tabindex="-1">Reply on your copy.</h2>
+          <p>Dear <span data-desk-name></span>,</p>
+          <p data-desk-letter-body></p>
+          <p>May we use the name on your copy and the likeness supplied with the earlier entry? The release attached to that entry has already been marked received. If someone who knows you recognizes the likeness, we would be grateful for an account of how they know you.</p>
+          <p>Jim Lyndon<br><span class="record-note">Chair of the Board</span></p>
+          <form class="desk-form desk-corrections" data-desk-correction>
+            <label for="desk-correction">What would you like corrected?</label>
+            <select id="desk-correction">
+              <option value="visit">I did not make these visits.</option>
+              <option value="likeness">Keep my name and likeness out of the record.</option>
+              <option value="close">Close my file.</option>
+            </select>
+            <button type="submit" class="button">Send correction to the desk</button>
+          </form>
+          <div class="visitor-notice desk-resolution" data-desk-resolution hidden>
+            <h3 id="desk-resolution-title" tabindex="-1">Correction entered.</h3>
+            <p data-desk-resolution-body></p>
+            <a href="about.html#annual-report">How the Institute counts participation</a>
+          </div>
+        </article>
+        <button class="text-link desk-link-button desk-clear" type="button" data-desk-clear>Clear this record from this browser</button>
+      </div>
+    </section>
