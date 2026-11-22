@@ -1,0 +1,95 @@
+name: Deploy to Spaceship
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: spaceship-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    environment: production
+    env:
+      PUBLIC_SITE_ORIGIN: ${{ vars.PUBLIC_SITE_ORIGIN }}
+
+    steps:
+      - name: Check out the site
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          persist-credentials: false
+
+      - name: Build the site and write its release marker
+        shell: bash
+        run: |
+          if [[ -z "$PUBLIC_SITE_ORIGIN" ]]; then
+            echo 'Set the PUBLIC_SITE_ORIGIN variable to the public HTTPS site origin.' >&2
+            exit 1
+          fi
+          python3 build.py --canonical-origin "$PUBLIC_SITE_ORIGIN"
+          printf '%s:%s:%s\n' "$GITHUB_SHA" "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT" > .spaceship-build-id
+
+      - name: Install the FTPS client
+        shell: bash
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q --no-install-recommends lftp
+
+      - name: Upload the site over verified FTPS
+        shell: bash
+        env:
+          FTPS_HOST: ${{ secrets.SPACESHIP_FTPS_HOST }}
+          FTPS_USERNAME: ${{ secrets.SPACESHIP_FTPS_USERNAME }}
+          LFTP_PASSWORD: ${{ secrets.SPACESHIP_FTPS_PASSWORD }}
+        run: |
+          if [[ ! "$FTPS_HOST" =~ ^[a-zA-Z0-9.-]+$ || ! "$FTPS_USERNAME" =~ ^[a-zA-Z0-9._+@-]+$ || -z "$LFTP_PASSWORD" ]]; then
+            echo 'Set the Spaceship FTPS secrets for the directory-scoped deployment account.' >&2
+            exit 1
+          fi
+
+          # The FTP account is scoped to the site's document root, which is its login directory.
+          lftp --norc <<LFTP
+          set cmd:fail-exit yes
+          set ftp:ssl-allow yes
+          set ftp:ssl-auth TLS
+          set ftp:ssl-force yes
+          set ftp:ssl-protect-list yes
+          set ftp:ssl-protect-data yes
+          set ssl:verify-certificate yes
+          set ssl:check-hostname yes
+          set net:timeout 15s
+          set net:max-retries 2
+          set xfer:timeout 45s
+          set xfer:use-temp-file yes
+          open --env-password -u "$FTPS_USERNAME" "ftp://$FTPS_HOST:21"
+          mirror --reverse --parallel=1 --no-perms --depth-first --overwrite --transfer-all dist .
+          put .spaceship-build-id -o incipient-build.txt
+          bye
+          LFTP
+
+      - name: Verify the public release
+        shell: bash
+        run: |
+          response="$RUNNER_TEMP/incipient-build-response"
+          release_url="${PUBLIC_SITE_ORIGIN%/}/incipient-build.txt?run=${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          for attempt in 1 2 3 4 5; do
+            if curl --fail --silent --show-error --proto '=https' --max-time 12 \
+              --header 'Cache-Control: no-cache' --output "$response" "$release_url" &&
+              cmp -s .spaceship-build-id "$response"; then
+              echo 'Verified the deployed release.'
+              exit 0
+            fi
+            if [[ "$attempt" != 5 ]]; then
+              sleep 3
+            fi
+          done
+          echo 'The public deployment marker did not match this run.' >&2
+          exit 1
